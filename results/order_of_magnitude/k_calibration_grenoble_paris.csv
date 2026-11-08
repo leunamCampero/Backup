@@ -1,0 +1,13 @@
+scenario,region,formula,alpha,P_inf,k_per_km,kappa_kL,note
+Conservative,Grenoble,book.tex,0.17,0.14,,,P_inf below observed share (22.7%)
+Conservative,Grenoble,bicycle_model.tex,0.17,0.14,,,P_inf below observed share (22.7%)
+Conservative,Paris,book.tex,0.17,0.14,0.002875844374560256,1.483935697273092,
+Conservative,Paris,bicycle_model.tex,0.17,0.14,0.0010151858782762794,0.5238359131905602,
+Intermediate,Grenoble,book.tex,0.21,0.35,0.007822921228023342,0.7407540940663604,
+Intermediate,Grenoble,bicycle_model.tex,0.21,0.35,0.005642636261959569,0.5343024415739884,
+Intermediate,Paris,book.tex,0.21,0.35,0.0005204511421062687,0.26855278932683463,
+Intermediate,Paris,bicycle_model.tex,0.21,0.35,0.0004148334001965818,0.2140540345014362,
+Optimistic,Grenoble,book.tex,0.25,0.5,0.004293505629592418,0.40655297174980837,
+Optimistic,Grenoble,bicycle_model.tex,0.25,0.5,0.003672650141688799,0.347764032032416,
+Optimistic,Paris,book.tex,0.25,0.5,0.00038469554288201,0.19850290012711716,
+Optimistic,Paris,bicycle_model.tex,0.25,0.5,0.00033450086107491455,0.1726024443146559,

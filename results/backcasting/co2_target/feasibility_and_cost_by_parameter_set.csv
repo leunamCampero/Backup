@@ -1,0 +1,5 @@
+parameter_set,xi,r_BC,max_reduction_percent,feasible,note,total_allocated_meur,discounted_cost_meur,achieved_reduction_percent,bike_share_end_percent,abatement_cost_eur_per_t,marginal_cost_eur_per_t,slack_t
+Conservative,0.3,0.27,4.314172230907209,False,max achievable reduction 4.31% < target 10%,,,,,,,
+Intermediate,0.5,0.35,9.320742474182264,False,max achievable reduction 9.32% < target 10%,,,,,,,
+Optimistic,0.65,0.4,13.847960247356516,True,,9.4267859857333,8.60928840913597,10.0116522348103,32.960297503716504,776.3228362271435,2044.0952215150219,12.907090866792714
+Original notebook,1.0,1.0,53.26138556675579,True,,0.19317184396994463,0.18718201935072154,10.864301343206572,25.536296912726502,15.554039061615924,15.554039061615931,957.3799493980478

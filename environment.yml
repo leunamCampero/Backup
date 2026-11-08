@@ -1,0 +1,29 @@
+# Conda environment used to produce every result of the repository.
+#   conda env create -f environment.yml
+#   conda activate cyclelts
+#   python -m ipykernel install --user --name cyclelts
+name: cyclelts
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - osmnx=2.1
+  - networkx=3.6
+  - geopandas=1.2
+  - shapely=2.2
+  - pandas=3.0
+  - numpy=2.4
+  - scipy=1.17
+  - scikit-learn=1.9
+  - statsmodels=0.15
+  - plotly=7.1
+  - geojson=3.3
+  - xlrd=2.0          # INSEE .xls tables (2006-2016)
+  - openpyxl=3.1      # INSEE .xlsx tables (2017-2022)
+  - matplotlib        # only for extras/dos_category
+  - ipykernel
+  - nbformat
+  - nbclient
+  - pip
+  - pip:
+      - -e .          # installs the cyclelts package from this folder

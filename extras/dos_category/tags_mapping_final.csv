@@ -1,0 +1,22 @@
+Accotements Cyclables;d_Medium_Low
+Autres_chemins_pitons_autoris_aux_vlos;b_Medium_High
+Bandes_cyclables;d_Medium_Low
+Chaucidou;d_Medium_Low
+Cheminements_Cyclables;e_Low
+Double_sens_cyclables_en_bande;d_Medium_Low
+Double_sens_cyclables_en_piste;a_High
+Double_sens_cyclables_sans_bande;e_Low
+Escalier;f_Null_or_Others
+Footway_path_designated;b_Medium_High
+Footway_permissive;b_Medium_High
+Limite_a_30;f_Null_or_Others
+Pedestrian;f_Null_or_Others
+Pistes_cyclables;a_High
+Pistes_sur_trottoirs;b_Medium_High
+Routes_services_chemins_agricoles;b_Medium_High
+Trottoirs_cyclables;b_Medium_High
+Velorue;c_Medium
+Voies_bus;c_Medium
+Voies_vertes;b_Medium_High
+Zone_30;f_Null_or_Others
+Zone_rencontre;f_Null_or_Others

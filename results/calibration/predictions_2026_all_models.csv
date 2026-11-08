@@ -1,0 +1,34 @@
+city,year,index,predicted_share,model
+Angers,2026,0.297515,0.1409726397730283,Common intercept + slope
+Annecy,2026,0.247505,0.11604049152297857,Common intercept + slope
+Bordeaux,2026,0.315827,0.15087450142187872,Common intercept + slope
+Chambéry,2026,0.280152,0.13195782683281213,Common intercept + slope
+Grenoble,2026,0.407423,0.205534713799292,Common intercept + slope
+Lyon,2026,0.350973,0.17092960137315694,Common intercept + slope
+Nantes,2026,0.317035,0.1515414503678322,Common intercept + slope
+Paris,2026,0.50089,0.2661878206785413,Common intercept + slope
+Rennes,2026,0.335408,0.16188595830103747,Common intercept + slope
+Strasbourg,2026,0.422094,0.21488931254680743,Common intercept + slope
+Tours,2026,0.326087,0.15659156285408765,Common intercept + slope
+Angers,2026,0.5785089999999999,0.14682215733126255,City intercepts + common slope
+Annecy,2026,0.548503,0.1341230379254188,City intercepts + common slope
+Bordeaux,2026,0.5894962,0.23838220363872167,City intercepts + common slope
+Chambéry,2026,0.5680912,0.12594310174275225,City intercepts + common slope
+Grenoble,2026,0.6444538,0.2282013467841396,City intercepts + common slope
+Lyon,2026,0.6105838,0.159595218882217,City intercepts + common slope
+Nantes,2026,0.590221,0.16581713359537742,City intercepts + common slope
+Paris,2026,0.700534,0.17670186767269797,City intercepts + common slope
+Rennes,2026,0.6012448,0.1697341115892257,City intercepts + common slope
+Strasbourg,2026,0.6532564000000001,0.2284558197658134,City intercepts + common slope
+Tours,2026,0.5956522,0.10564326082727174,City intercepts + common slope
+Angers,2026,0.75413025,0.13917723877629257,City intercepts + city slopes
+Annecy,2026,0.73662675,0.11662410481907974,City intercepts + city slopes
+Bordeaux,2026,0.76053945,0.24826374701372678,City intercepts + city slopes
+Chambéry,2026,0.7480532,0.13180422025641716,City intercepts + city slopes
+Grenoble,2026,0.79259805,0.2411041169023326,City intercepts + city slopes
+Lyon,2026,0.77284055,0.1893573758516046,City intercepts + city slopes
+Nantes,2026,0.7609622500000001,0.17058372830164584,City intercepts + city slopes
+Paris,2026,0.8253115,0.18116082873296774,City intercepts + city slopes
+Rennes,2026,0.7673928,0.2445642255936978,City intercepts + city slopes
+Strasbourg,2026,0.7977329,0.22369598750524336,City intercepts + city slopes
+Tours,2026,0.76413045,0.11475567381103603,City intercepts + city slopes

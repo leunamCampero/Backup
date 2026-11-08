@@ -1,0 +1,36 @@
+# ---- Python, Jupyter, editors -------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+
+# ---- Local archive of superseded notebooks and raw files (never published) ----
+_archive/
+
+# ---- Large or re-downloadable inputs (see data/README.md) ----------------------
+data/insee_raw/
+*.zip
+communes-*.json
+
+# ---- OpenStreetMap download caches ---------------------------------------------
+**/osm_http_cache/
+cache*/
+
+# ---- Network pickles -------------------------------------------------------------
+# Only the simplified Grenoble networks (needed by notebooks 03-07) are published.
+# All other networks are rebuilt by notebooks/01_build_lts_networks.ipynb.
+*.pkl
+*.tmp
+!results/lts_networks/grenoble/*/*/grenoble_lts_*_SIMPLE.pkl
+
+# Partial copy of the lookup table written while it is being computed
+results/mlcc_lookup/lookup_partial.csv
+
+# ---- Colleagues' unpublished model documents (cited, not distributed) ----------
+docs/references/*.tex
+docs/references/*.pdf
+
+# ---- Legacy PostGIS notebook: contains local database credentials (kept locally only)
+extras/dos_category/Grenoble_study.ipynb

@@ -1,0 +1,58 @@
+LTS model calibration / 11 cities (2017–2022). 2026 excluded from fitting and CV.
+Dependent variable: INSEE Deux-roues total (check bicycle-only interpretation).
+Maximum predicted share: 50% (assumed).
+Index = w_length * normalized_network_length + (1-w_length) * weighted_lcc_normalized.
+Fractional logit: predicted_share = 0.5 * sigmoid(alpha_city + beta_city * index).
+Selection: leave-one-calendar-year-out CV, RMSE in percentage points.
+
+Best model per structure:
+                     structure  weight_length  weight_lcc  cv_rmse_pp  cv_mae_pp status
+ City intercepts + city slopes           0.65        0.35    0.879759   0.745873     ok
+City intercepts + common slope           0.40        0.60    1.051767   0.826584     ok
+      Common intercept + slope           0.00        1.00    2.909849   2.183600     ok
+
+Selected overall:
+structure        City intercepts + city slopes
+weight_length                             0.65
+weight_lcc                                0.35
+cv_rmse_pp                            0.879759
+cv_mae_pp                             0.745873
+status                                      ok
+
+2026 scenario predictions:
+      city  year    index  predicted_share                          model
+    Angers  2026 0.297515         0.140973       Common intercept + slope
+    Annecy  2026 0.247505         0.116040       Common intercept + slope
+  Bordeaux  2026 0.315827         0.150875       Common intercept + slope
+  Chambéry  2026 0.280152         0.131958       Common intercept + slope
+  Grenoble  2026 0.407423         0.205535       Common intercept + slope
+      Lyon  2026 0.350973         0.170930       Common intercept + slope
+    Nantes  2026 0.317035         0.151541       Common intercept + slope
+     Paris  2026 0.500890         0.266188       Common intercept + slope
+    Rennes  2026 0.335408         0.161886       Common intercept + slope
+Strasbourg  2026 0.422094         0.214889       Common intercept + slope
+     Tours  2026 0.326087         0.156592       Common intercept + slope
+    Angers  2026 0.578509         0.146822 City intercepts + common slope
+    Annecy  2026 0.548503         0.134123 City intercepts + common slope
+  Bordeaux  2026 0.589496         0.238382 City intercepts + common slope
+  Chambéry  2026 0.568091         0.125943 City intercepts + common slope
+  Grenoble  2026 0.644454         0.228201 City intercepts + common slope
+      Lyon  2026 0.610584         0.159595 City intercepts + common slope
+    Nantes  2026 0.590221         0.165817 City intercepts + common slope
+     Paris  2026 0.700534         0.176702 City intercepts + common slope
+    Rennes  2026 0.601245         0.169734 City intercepts + common slope
+Strasbourg  2026 0.653256         0.228456 City intercepts + common slope
+     Tours  2026 0.595652         0.105643 City intercepts + common slope
+    Angers  2026 0.754130         0.139177  City intercepts + city slopes
+    Annecy  2026 0.736627         0.116624  City intercepts + city slopes
+  Bordeaux  2026 0.760539         0.248264  City intercepts + city slopes
+  Chambéry  2026 0.748053         0.131804  City intercepts + city slopes
+  Grenoble  2026 0.792598         0.241104  City intercepts + city slopes
+      Lyon  2026 0.772841         0.189357  City intercepts + city slopes
+    Nantes  2026 0.760962         0.170584  City intercepts + city slopes
+     Paris  2026 0.825311         0.181161  City intercepts + city slopes
+    Rennes  2026 0.767393         0.244564  City intercepts + city slopes
+Strasbourg  2026 0.797733         0.223696  City intercepts + city slopes
+     Tours  2026 0.764130         0.114756  City intercepts + city slopes
+
+Note: selected CV minimum can be optimistic; 2026 predictions are extrapolations, not observed.
