@@ -15,7 +15,10 @@ data/insee_raw/
 communes-*.json
 
 # ---- OpenStreetMap download caches ---------------------------------------------
+# (the published downloads are shipped compressed in data/osm_snapshots/ and
+#  extras/dos_category/osm_snapshots/, and unpacked here automatically)
 **/osm_http_cache/
+**/osm_snapshot/
 cache*/
 
 # ---- Network pickles -------------------------------------------------------------

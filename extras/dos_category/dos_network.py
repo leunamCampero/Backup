@@ -198,6 +198,28 @@ def seed_cache(source, destination):
     print(f"[cache] copied {copied} cached Overpass responses from {source}")
 
 
+def restore_cache(archive, run):
+    """Unpack a shipped ``.tar.xz`` of this study's Overpass answers into ``<run>/osm_http_cache``.
+
+    The two published runs ship their downloads in ``osm_snapshots/`` so they can
+    be rebuilt without internet. Does nothing if the archive is missing or the
+    cache already contains files.
+    """
+    import tarfile
+    archive, run = Path(archive), Path(run)
+    if not archive.exists() or any((run / "osm_http_cache").rglob("*.json")):
+        return False
+    with tarfile.open(archive, "r:xz") as tar:
+        if not all(n.startswith("osm_http_cache") and ".." not in n for n in tar.getnames()):
+            raise ValueError(f"Unexpected paths in {archive}")
+        try:
+            tar.extractall(run, filter="data")
+        except TypeError:
+            tar.extractall(run)
+    print(f"[cache] unpacked the shipped Overpass answers {archive.name} -> {run / 'osm_http_cache'}")
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Graph building
 # ---------------------------------------------------------------------------

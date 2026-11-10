@@ -17,13 +17,22 @@ Why this module exists
 
 Downloads are cached on disk (``cache_folder``), so running a notebook twice
 does not download the same data twice.
+
+Shipped snapshots: ``snapshot_file`` is a saved Overpass answer (JSON) for the
+same polygon, date and network type. When it exists it is used *instead of*
+the network request, so the published networks can be rebuilt offline and
+exactly (see ``data/osm_snapshots/``). OSMnx still does every other step
+(graph creation, truncation to the polygon, simplification).
 """
 from __future__ import annotations
 
+import json
 import time
 from contextlib import contextmanager
+from pathlib import Path
 
 import osmnx as ox
+from osmnx import _http
 
 # Public Overpass servers that accept normal OSMnx queries. All three also
 # accept historical ([date:"..."]) queries. Order = order tried.
@@ -47,9 +56,30 @@ def _settings(**values):
             setattr(ox.settings, k, v)
 
 
+@contextmanager
+def _serve_snapshot(snapshot_file):
+    """Answer OSMnx's (single) Overpass request with the JSON in ``snapshot_file``.
+
+    Uses OSMnx's cache hook (``osmnx._http._retrieve_from_cache``, OSMnx 2.x):
+    the saved answer is returned as if it came from the cache, whatever the
+    request URL is. No request may reach the internet while this is active.
+    """
+    data = json.loads(Path(snapshot_file).read_text(encoding="utf-8"))
+    original = _http._retrieve_from_cache
+
+    def from_snapshot(url):
+        return data
+
+    _http._retrieve_from_cache = from_snapshot
+    try:
+        yield
+    finally:
+        _http._retrieve_from_cache = original
+
+
 def download_graph(polygon, network_type, *, date=None, server_timeout=600,
                    endpoints=None, attempts_per_endpoint=2, wait_seconds=30,
-                   cache_folder=None, **graph_kwargs):
+                   cache_folder=None, snapshot_file=None, **graph_kwargs):
     """``ox.graph.graph_from_polygon`` with retries across Overpass mirrors.
 
     Parameters
@@ -61,6 +91,7 @@ def download_graph(polygon, network_type, *, date=None, server_timeout=600,
     server_timeout : seconds the Overpass server may work on the query.
     endpoints : list of Overpass URLs to try in order (default: OVERPASS_ENDPOINTS).
     cache_folder : folder of the OSMnx HTTP cache for this query.
+    snapshot_file : saved Overpass answer to use instead of downloading (if it exists).
 
     Returns
     -------
@@ -70,6 +101,11 @@ def download_graph(polygon, network_type, *, date=None, server_timeout=600,
     overpass_settings = f"[out:json][timeout:{int(server_timeout)}]{date_part}{{maxsize}}"
     kwargs = dict(simplify=True, retain_all=True, truncate_by_edge=True)
     kwargs.update(graph_kwargs)
+    if snapshot_file is not None and Path(snapshot_file).exists():
+        print(f"[overpass] {network_type} | shipped snapshot {Path(snapshot_file).parent.name}/"
+              f"{Path(snapshot_file).name} (no download)", flush=True)
+        with _serve_snapshot(snapshot_file), _settings(use_cache=True, overpass_rate_limit=False):
+            return ox.graph.graph_from_polygon(polygon, network_type=network_type, **kwargs)
     tried = []
     for endpoint in (endpoints or OVERPASS_ENDPOINTS):
         for attempt in range(1, attempts_per_endpoint + 1):

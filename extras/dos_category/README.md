@@ -23,5 +23,6 @@ The `WHERE` clauses of the SQL files are run unchanged on an in-memory SQLite ta
 | `Grenoble_study.ipynb` | original PostGIS version — kept locally only, not published (it contains local database settings) |
 | `run.py`, `name_format.py`, `sql_template.sql`, `bicycle.style` | tools of the original PostGIS workflow (osm2pgsql style, SQL templating) |
 | `dos_output/grenoble/<run>/` | lengths per DoS category (CSV) and maps (PNG, HTML); network pickles are not in git |
+| `osm_snapshots/grenoble_<run>.tar.xz` | the Overpass answers of the two published runs (1.3 MB each), unpacked automatically so both notebooks rebuild them without internet |
 
 Requires the `cyclelts` package of this repository (the notebooks find it automatically) and `matplotlib`.

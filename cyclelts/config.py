@@ -9,6 +9,8 @@ Folder layout::
       data/                         inputs (small ones are in git)
         city_polygons.geojson       official boundary of each studied commune
         insee_raw/NAV2A_<year>/     raw INSEE census tables (download, not in git)
+        insee_nav2a_extract/        the rows of the studied communes from those tables (in git)
+        osm_snapshots/<city>.tar.xz the OpenStreetMap downloads used by step 1 (in git)
         insee_modal_shares/         commuting mode shares per city (step 2 output)
       results/
         lts_networks/<city>/<run>/  yearly LTS networks and their metrics (step 1)
@@ -34,6 +36,8 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 CITY_POLYGONS = DATA_DIR / "city_polygons.geojson"
 INSEE_RAW_DIR = DATA_DIR / "insee_raw"
+INSEE_EXTRACT_DIR = DATA_DIR / "insee_nav2a_extract"
+OSM_SNAPSHOTS_DIR = DATA_DIR / "osm_snapshots"
 INSEE_SHARES_DIR = DATA_DIR / "insee_modal_shares"
 
 LTS_DIR = RESULTS_DIR / "lts_networks"
@@ -104,7 +108,8 @@ def get_city(name: str) -> City:
 # ---------------------------------------------------------------------------
 # Loading helpers
 # ---------------------------------------------------------------------------
-def load_city_polygon(name: str, insee: str | None = None, communes_file: str | Path | None = None):
+def load_city_polygon(name: str, insee: str | None = None, communes_file: str | Path | None = None,
+                      precision: int | None = 6):
     """Return the boundary of a commune as a Shapely (Multi)Polygon in WGS84.
 
     By default the polygon is read from ``data/city_polygons.geojson`` (the 11
@@ -112,8 +117,14 @@ def load_city_polygon(name: str, insee: str | None = None, communes_file: str | 
     ``communes-20220101.json`` file (OpenStreetMap French communes export, see
     ``data/README.md``) as ``communes_file``. ``insee`` is only needed when
     several communes share the same name.
+
+    Coordinates are rounded to ``precision`` decimals (6 = about 0.1 m), as the
+    ``geojson`` library did when the published networks were built. OSMnx cuts
+    the network exactly at this boundary, so the rounding is needed to rebuild
+    the published networks identically. ``precision=None`` keeps the raw values.
     """
     from shapely.geometry import shape
+    from shapely.ops import transform
 
     path = Path(communes_file) if communes_file else CITY_POLYGONS
     with path.open("r", encoding="utf-8") as f:
@@ -130,6 +141,9 @@ def load_city_polygon(name: str, insee: str | None = None, communes_file: str | 
         codes = [m["properties"].get("insee") for m in matches]
         raise ValueError(f"{len(matches)} communes are named {name!r}; pass insee= one of {codes}")
     poly = shape(matches[0]["geometry"])
+    if precision is not None:
+        poly = transform(lambda x, y, z=None: (tuple(round(v, precision) for v in x),
+                                               tuple(round(v, precision) for v in y)), poly)
     if not poly.is_valid:
         poly = poly.buffer(0)  # repairs self-intersections without moving the boundary
     if poly.is_empty:

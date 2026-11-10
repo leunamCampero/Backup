@@ -18,15 +18,23 @@ For each city and year the pipeline is::
   ``bicycle_prohibited`` instead and can never be upgraded.
 
 Every intermediate graph is saved, so an interrupted run resumes where it stopped.
+
+Offline rebuild: the raw OpenStreetMap answers used for the published run
+(``config.DEFAULT_RUN``) are shipped compressed in
+``data/osm_snapshots/<city>.tar.xz`` (1-5 MB per city). When a builder is
+created for that run, the archive is unpacked into ``<run>/osm_snapshot/`` and
+used instead of downloading, so the networks of all 11 cities are rebuilt
+exactly, without internet. A run with another name downloads fresh data.
 """
 from __future__ import annotations
 
+import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 import networkx as nx
 
-from .config import CURRENT_YEAR, REPO_ROOT, load_pickle, save_pickle
+from .config import CURRENT_YEAR, DEFAULT_RUN, OSM_SNAPSHOTS_DIR, REPO_ROOT, load_pickle, save_pickle
 from .lts import _values, annotate_graph, infer_lanes, infer_speed_kmh, largest_weak_component
 from .overpass import OVERPASS_ENDPOINTS, download_graph
 from .simplify import check_graph, simplify_lts_graph
@@ -150,6 +158,31 @@ def missing_car_network(bike, car, match='endpoints', year=CURRENT_YEAR):
 
 
 # ---------------------------------------------------------------------------
+# Shipped OpenStreetMap downloads
+# ---------------------------------------------------------------------------
+def unpack_osm_archive(archive, folder):
+    """Unpack a ``.tar.xz`` of saved Overpass answers into ``folder``.
+
+    The archive holds ``osm_snapshot/<date or current>/<bike|drive>.json``.
+    Does nothing (returns False) if the archive does not exist or was already
+    unpacked. Returns True if unpacked.
+    """
+    folder, archive = Path(folder), Path(archive)
+    if not archive.exists() or any((folder / "osm_snapshot").rglob("*.json")):
+        return False
+    folder.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(archive, "r:xz") as tar:
+        if not all(n.startswith("osm_snapshot") and ".." not in n for n in tar.getnames()):
+            raise ValueError(f"Unexpected paths in {archive}")
+        try:
+            tar.extractall(folder, filter="data")
+        except TypeError:                     # Python without extraction filters
+            tar.extractall(folder)
+    print(f"Unpacked the shipped OpenStreetMap data {_short(archive)} -> {_short(folder / 'osm_snapshot')}")
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Build one city-year
 # ---------------------------------------------------------------------------
 class CityNetworkBuilder:
@@ -173,6 +206,12 @@ class CityNetworkBuilder:
         self.cache = self.run / "osm_http_cache"
         self.rebuild, self.timeout, self.match = rebuild, timeout, match
         self.endpoints, self.current_year = endpoints, current_year
+        # Published run: use the shipped OpenStreetMap answers instead of downloading
+        self.snapshots = None
+        if self.run.name == DEFAULT_RUN:
+            unpack_osm_archive(OSM_SNAPSHOTS_DIR / f"{slug}.tar.xz", self.run)
+            if (self.run / "osm_snapshot").is_dir():
+                self.snapshots = self.run / "osm_snapshot"
 
     def snapshot(self, year):
         """Historical years -> 31 Dec timestamp; current year -> None (current OSM)."""
@@ -180,9 +219,11 @@ class CityNetworkBuilder:
 
     def _download(self, year, network_type):
         date = self.snapshot(year)
+        folder = date[:10] if date else "current"
+        snapshot = self.snapshots / folder / f"{network_type}.json" if self.snapshots else None
         return download_graph(self.polygon, network_type, date=date, server_timeout=self.timeout,
-                              endpoints=self.endpoints,
-                              cache_folder=self.cache / (date[:10] if date else "current"))
+                              endpoints=self.endpoints, cache_folder=self.cache / folder,
+                              snapshot_file=snapshot)
 
     def get_bike(self, year):
         """Bicycle network of ``year`` with integer LTS 1-4 (cached in ``<year>/..._prepared.pkl``)."""

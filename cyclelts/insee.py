@@ -22,6 +22,11 @@ To have one comparable series over 2006-2022 the column ``Deux-roues total``
 (= bicycle + motorised two-wheelers from 2017) is used as the dependent
 variable of the model. ``Vélo`` (bicycle only) exists only from 2017.
 
+The raw tables are large (~600 MB, not in git). The repository ships an
+*extract* - the complete rows of the studied communes, one CSV per year
+(``data/insee_nav2a_extract/NAV2A_<year>.csv``, written by :func:`write_extract`).
+Every function below accepts either the raw Excel files or this extract.
+
 Output columns (French names kept, as in INSEE): ``Year, CODGEO, Commune,
 Pas de déplacement, Marche, Deux-roues total, Vélo, Deux-roues motorisé,
 Voiture, TC`` - all in percent of the employed population.
@@ -107,7 +112,7 @@ def find_nav2a_files(base_dir, years_wanted):
     """``{year: path}`` - one NAV2A Excel file per year, searched in all sub-folders."""
     excel_files = []
     for p in Path(base_dir).rglob("*"):
-        if p.suffix.lower() not in [".xls", ".xlsx"] or p.name.startswith("~$"):
+        if p.suffix.lower() not in [".xls", ".xlsx", ".csv"] or p.name.startswith("~$"):
             continue
         year = extract_year_from_path(p, years_wanted)
         if year is not None:
@@ -120,8 +125,16 @@ def find_nav2a_files(base_dir, years_wanted):
 
 
 def read_nav2a_table(file_path):
-    """Commune-level sheet of one NAV2A file as a DataFrame (``CODGEO`` as 5-digit text)."""
+    """Commune-level sheet of one NAV2A file as a DataFrame (``CODGEO`` as 5-digit text).
+
+    ``file_path`` is a raw INSEE Excel file or a CSV extract (:func:`write_extract`).
+    """
     file_path = Path(file_path)
+    if file_path.suffix.lower() == ".csv":
+        df = pd.read_csv(file_path, dtype={"CODGEO": str}, encoding="utf-8-sig",
+                         float_precision="round_trip")   # bit-exact values
+        df["CODGEO"] = df["CODGEO"].str.zfill(5)
+        return df
     sheet_name = get_commune_sheet_name(file_path)
     header_row = find_header_row_excel(file_path, sheet_name)
     df = pd.read_excel(file_path, sheet_name=sheet_name, header=header_row, dtype={"CODGEO": str})
@@ -208,6 +221,22 @@ def modal_shares_for_communes(codgeos, base_dir, years=range(2006, 2023), verbos
         frame = pd.DataFrame(rows).sort_values("Year")
         out[codgeo] = frame[["Year", "CODGEO", "Commune", *MODE_COLUMNS]].reset_index(drop=True)
     return out
+
+
+def write_extract(codgeos, base_dir, out_dir, years=range(2006, 2023)):
+    """Save the rows of ``codgeos`` from each raw NAV2A table as ``out_dir/NAV2A_<year>.csv``.
+
+    All columns are kept unchanged, so the extract gives exactly the same mode
+    shares as the raw tables. This is how ``data/insee_nav2a_extract/`` was made.
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    wanted = {str(c).zfill(5) for c in codgeos}
+    for year, path in sorted(find_nav2a_files(base_dir, list(years)).items()):
+        table = read_nav2a_table(path)
+        rows = table[table["CODGEO"].isin(wanted)]
+        rows.to_csv(out_dir / f"NAV2A_{year}.csv", index=False, encoding="utf-8-sig")
+        print(f"{year}: {len(rows)} communes from {path.name}")
 
 
 def modal_shares_for_commune(codgeo, base_dir, years=range(2006, 2023), verbose=True):

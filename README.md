@@ -29,8 +29,8 @@ investments in **Grenoble** up to 2050.
 
 | # | Notebook | Question | Run time* |
 |---|---|---|---|
-| 1 | [`01_build_lts_networks`](notebooks/01_build_lts_networks.ipynb) | How did each city's cycling network and its stress level evolve, 2017–2026? | 30 s (Grenoble, cached) · 10–60 min per city if downloaded |
-| 2 | [`02_insee_mode_shares`](notebooks/02_insee_mode_shares.ipynb) | What share of workers commute by bike, car, transit, foot? | 7 min (or instant from the saved CSVs) |
+| 1 | [`01_build_lts_networks`](notebooks/01_build_lts_networks.ipynb) | How did each city's cycling network and its stress level evolve, 2017–2026? | 30 s (Grenoble, saved) · 2–10 min per city rebuilt offline from the shipped OSM data |
+| 2 | [`02_insee_mode_shares`](notebooks/02_insee_mode_shares.ipynb) | What share of workers commute by bike, car, transit, foot? | 2 s (from the shipped INSEE extract) |
 | 3 | [`03_infrastructure_vs_bike_share`](notebooks/03_infrastructure_vs_bike_share.ipynb) | Do better networks go with more cycling? What does it predict for 2026? | 20 s |
 | 4 | [`04_mlcc_vs_genetic_algorithm`](notebooks/04_mlcc_vs_genetic_algorithm.ipynb) | With a given budget, which streets to upgrade? Greedy heuristic vs genetic algorithm | 13 min |
 | 5 | [`05_mlcc_lookup_table`](notebooks/05_mlcc_lookup_table.ipynb) | For every budget from 0 to 39 M€: what network, what predicted share? | 40 s (5 min to rebuild) |
@@ -74,9 +74,18 @@ python -m ipykernel install --user --name cyclelts
 jupyter lab notebooks/                    # or open the folder in VS Code
 ```
 
-Run the notebooks in order. **Steps 3–7 run immediately**: the repository ships the simplified Grenoble networks,
-the metrics of all 11 cities and the INSEE mode shares. To rebuild another city's networks, set
-`CITIES_TO_BUILD` in notebook 01 (needs internet; public Overpass servers can be slow — re-run the cell to resume).
+Run the notebooks in order. **Everything runs from this repository alone, without internet and without any other
+file**:
+
+* the raw OpenStreetMap data of the 11 cities (`data/osm_snapshots/`, 21 MB) — notebook 01 rebuilds every network
+  from it (set `CITIES_TO_BUILD` to any list of cities);
+* the INSEE rows of the studied communes (`data/insee_nav2a_extract/`, 0.2 MB) — notebook 02 recomputes the mode
+  shares from it;
+* the simplified Grenoble networks, the metrics of all 11 cities and the intermediate results, so steps 3–7 also run
+  immediately on their own.
+
+To download *new* OpenStreetMap data instead, give notebook 01 a new `RUN_NAME` (needs internet; public Overpass
+servers can be slow — re-run the cell to resume).
 
 The code can also be used directly:
 
@@ -103,7 +112,7 @@ cyclelts/                 Python package with all the code (documented module by
   optimization.py         MLCC heuristic, genetic algorithm, lookup table (steps 4-6)
   plotting.py             interactive Plotly maps
 notebooks/                the 7 steps, to run in order
-data/                     inputs (see data/README.md for the large raw files)
+data/                     inputs: city boundaries, OSM snapshots, INSEE extract (see data/README.md)
 results/                  every output, one folder per step (see results/README.md)
 docs/                     methodology notes and references
 extras/dos_category/      side study: "Degree of Separation" classification of the Grenoble network
@@ -124,13 +133,15 @@ extras/dos_category/      side study: "Degree of Separation" classification of t
 
 ## Reproducibility
 
-* Every number in `results/` was regenerated with the notebooks of this repository; re-running them reproduces
-  the files exactly (checked when the repository was organised).
-* OpenStreetMap downloads are cached on disk (`osm_http_cache/`, not in git). A *fresh* download can differ
-  slightly from the published networks because OSM's history is edited over time; the run folder name
-  (`fresh_2026-10-21`) records when the published networks were built.
-* Not stored in git (size): raw INSEE tables (~600 MB, see [`data/README.md`](data/README.md)), the networks of the
-  10 cities other than Grenoble (~1.5 GB, rebuilt by notebook 01), intermediate graphs and download caches.
+* Every number in `results/` was regenerated with the notebooks of this repository, and a fresh `git clone` was
+  checked to reproduce the files exactly — including rebuilding the networks of all 11 cities offline from
+  `data/osm_snapshots/` and the mode shares from `data/insee_nav2a_extract/`.
+* The OpenStreetMap answers used for the published run (`fresh_2026-10-21`) are shipped, so rebuilding that run
+  gives identical networks. A *new* run downloads fresh data, which can differ slightly because OSM's history is
+  edited over time.
+* Not stored in git (size), all re-creatable: the full national INSEE tables (~600 MB, see
+  [`data/README.md`](data/README.md)), the network pickles of the 10 cities other than Grenoble (~1.5 GB, rebuilt
+  by notebook 01 in a few minutes each) and intermediate graphs.
 
 ## Limitations
 
